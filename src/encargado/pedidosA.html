@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodCourt - Pedidos Actuales</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #1e1e24;
+      color: #fff8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+   header {
+      background: #91240c;
+      padding: 1rem 1rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-image: url('../../media/fondo4.png');
+      background-size: cover;
+    }
+.logo {
+      border: double;
+      background-color: #e5a657;
+      border-color: #c93616;
+      border-width: 8px;
+      margin-bottom: 0.2rem;
+      text-align: center;
+    }
+    .logo-center h1 { font-size: 1.8rem; color: #ffcf99; margin-bottom: 0.3rem; }
+    .logo-center .restaurant-name { font-size: 1.4rem; color: #91240c; opacity: 0.9; font-weight: 800; }
+    .user-info { font-size: 1rem; color: #91240c; font-weight: 600; }
+    .date-info { font-size: 1rem; color: #91240c; opacity: 0.9;font-weight: 600; }
+
+    nav { background: #92140c; padding: 1rem; display: flex; justify-content: center; gap: 2.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.4);flex-wrap: wrap; }
+    nav a { color: #fff8f0; text-decoration: none; font-size: 1.1rem; font-weight: 500; padding: 0.6rem 1.2rem; border-radius: 8px; transition: all 0.3s ease; }
+    nav a:hover, nav a.active { background: #ffcf99; color: #1e1e24; }
+
+    main { flex: 1; padding: 2rem; max-width: 1300px; margin: 0 auto; width: 100%; }
+
+    h2 { font-size: 2.2rem; color: #ffcf99; margin-bottom: 1.5rem; text-align: center; }
+
+    .filter-input {
+      flex: 1;
+      min-width: 250px;
+      padding: 0.8rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      background: #2a2a32;
+      color: #fff8f0;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .filter-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px #ffcf99;
+      background: #33333b;
+    }
+    .tabs { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .tab-btn {
+      background: #2a2a32;
+      color: #fff8f0;
+      border: 2px solid #ffcf99;
+      padding: 1rem 2.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 180px;
+    }
+    #local-tab{
+      border-top-left-radius: 12px;
+      border-bottom-left-radius: 12px;
+    }
+    #delivery-tab{
+      border-top-right-radius: 12px;
+      border-bottom-right-radius: 12px;
+      margin-left: -20px; 
+    }
+
+    .tab-btn.active { background: #ffcf99; color: #1e1e24; border-color: #fff8f0; }
+    .tab-btn:hover:not(.active) { background: #33333b; }
+
+    .status-filters { display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .status-btn {
+      background: #747e3b;
+      color: #ffcf99;
+      font-size: 1rem;
+      border: none;
+      padding: 0.8rem 1.8rem;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .status-btn.active { background: #ffcf99; color: #1e1e24; }
+    .status-btn:hover { opacity: 0.9; }
+
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #444; }
+    th { background: #111d4a; color: #ffcf99; }
+    tr:hover { background: rgba(255,248,240,0.05); }
+    .estado-r { color: #ffcf99; font-weight: bold; }
+.estado-p { color: #ffb366; font-weight: bold; }
+.estado-l { color: #4caf50; font-weight: bold; }
+
+.btn-change {
+  background: linear-gradient(135deg, #ffcf99, #ffb366);
+  color: #1e1e24;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+.btn-change:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255,207,153,0.4);
+}
+
+    .btn-detail {
+      background: #ffcf99;
+      color: #1e1e24;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn-detail:hover { background: #ffb366; }
+
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 200; }
+    .modal-content { background: #fff8f0; color: #1e1e24; padding: 2rem; border-radius: 16px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; position: relative; }
+    .modal-close { position: absolute; top: 1rem; right: 1.5rem; font-size: 2rem; cursor: pointer; color: #92140c; }
+    .modal h3 { color: #92140c; margin-bottom: 1.5rem; text-align: center; }
+    .detail-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    .detail-table th, .detail-table td { padding: 0.8rem; border-bottom: 1px solid #ccc; }
+    .detail-table th { background: #f0e8e0; }
+
+    .loading, .no-data { text-align: center; font-size: 1.3rem; color: #ffcf99; margin: 3rem 0; }
+    @media (max-width: 768px) {
+  nav {
+    flex-direction: column; 
+    padding: 0.5rem 0rem; 
+  }
+
+  nav a {
+    font-size: 1rem; 
+    padding: 0.5rem 0rem;
+    width: 100%; 
+    text-align: center;
+  }
+
+  main {
+    padding: 2rem 1rem; 
+  }
+
+  h2 {
+    font-size: 1.8rem; 
+  }
+
+  .welcome-text {
+    font-size: 1rem; 
+  }
+
+}
+
+@media (max-width: 480px) {
+  h2 {
+    font-size: 1.5rem; 
+  }
+
+  .action-card {
+    padding: 1rem; 
+  }
+
+  .btn-action {
+    padding: 0.8rem;     
+    font-size: 1rem; 
+  }
+}
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="date-info">
+      Fecha: {{ fechaHoy }} <br>
+      Hora: {{ hora }} <br>
+    </div>
+    <div class="logo-center">
+      <div class="logo"><img src="../../media/logo1.png" width="180" height="80"></div>
+      <div class="restaurant-name">Restaurante: {{ nombreRestaurante }}</div>
+    </div>
+    <div class="user-info">Encargado: {{ nombreEmpleado }}</div>
+  </header>
+
+  <nav>
+    <a href="menuencargado.html">Inicio</a>
+    <a href="productos.html">Gestión de Productos</a>
+    <a href="pedidosA.html" class="active">Pedidos Actuales</a>
+    <a href="pedidosF.html">Pedidos Finalizados</a>
+    <a href="venta.html">Registrar Venta</a>
+  </nav>
+
+  <main>
+    <h2>Pedidos y Ventas Actuales</h2>
+
+    <div class="tabs">
+      <button id="local-tab" class="tab-btn" :class="{ active: tipo === 'local' }" @click="tipo = 'local'; filtroEstado = ''">Local</button>
+      <button id="delivery-tab" class="tab-btn" :class="{ active: tipo === 'delivery' }" @click="tipo = 'delivery'; filtroEstado = ''">Delivery</button>
+    </div>
+
+    <div class="status-filters">
+      <button class="status-btn" :class="{ active: filtroEstado === 'R' }" @click="filtroEstado = 'R'">Registrado</button>
+      <button class="status-btn" :class="{ active: filtroEstado === 'P' }" @click="filtroEstado = 'P'">En preparación</button>
+      <button class="status-btn" :class="{ active: filtroEstado === 'L' }" @click="filtroEstado = 'L'">Listo</button>
+      <button class="status-btn" :class="{ active: filtroEstado === '' }" @click="filtroEstado = ''">Todos</button>
+    </div>
+<div style="margin: 1.5rem 0; max-width: 400px; margin-left: auto; margin-right: auto;">
+  <input 
+    v-model="filtroCliente" 
+    placeholder="Buscar por nombre del cliente..." 
+    class="filter-input" 
+    style="width: 100%;"
+  >
+</div>
+    <div v-if="cargando" class="loading">Cargando pedidos...</div>
+    <div v-else-if="pedidosFiltrados.length === 0" class="no-data">Nada aquí por ahora...</div>
+
+    <div v-else class="table-container">
+        <table>
+      <thead>
+  <tr>
+    <th>ID</th>
+    <th>NIT/CI</th>
+    <th>Cliente</th>
+    <th>Fecha</th>
+    <th>Productos</th>
+    <th>Estado Actual</th>
+    <th>Cambiar a</th>
+    <th>Acción</th>
+  </tr>
+</thead>
+<tbody>
+<tr v-for="item in pedidosFiltrados" :key="item?.id || Math.random()">
+  <td>{{ item?.id || '—' }}</td>
+  <td>{{ item?.razon_social || '—' }}</td>
+  <td>{{ item?.nombre_cliente || 'Cliente desconocido' }}</td>
+  <td>{{ item?.fecha || '—' }}</td>
+  <td>{{ item?.cantidad_productos || 0 }}</td>
+  <td>
+    <span :class="{
+  'estado-r': item?.estado === 'R',
+  'estado-p': item?.estado === 'P',
+  'estado-l': item?.estado === 'L'
+}">
+      {{ getNombreEstado(item?.estado) || '—' }}
+    </span>
+  </td>
+  <td>
+    <button 
+        v-if="item.estado === 'R'" 
+        class="btn-change" 
+        @click="cambiarEstado(item.id, 'P')"
+      >Pasar a En preparación</button>
+
+      <button 
+        v-else-if="item.estado === 'P'" 
+        class="btn-change" 
+        @click="cambiarEstado(item.id, 'L')"
+      >Pasar a Listo</button>
+
+      <button 
+        v-else-if="item.estado === 'L'" 
+        class="btn-change" 
+        @click="cambiarEstado(item.id, tipo === 'local' ? 'E' : 'C')"
+      >{{ tipo === 'local' ? 'Marcar como Entregado' : 'Marcar como En camino' }}</button>
+    
+  </td>
+  <td>
+    <button class="btn-detail" @click="verDetalle(item)">Ver detalle</button>
+  </td>
+</tr>
+  
+</tbody>
+</table>
+    </div>
+
+<div v-if="mostrarDetalle" class="modal" @click="mostrarDetalle = false">
+  <div class="modal-content" @click.stop>
+    <span class="modal-close" @click="mostrarDetalle = false">×</span>
+    <h3>Detalle {{ tipo === 'local' ? 'Venta' : 'Pedido' }} #{{ detalleSeleccionado.id }}</h3>
+
+    <table class="detail-table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Tiempo Prep.</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="det in detalleSeleccionado.items" :key="det.id_detalle || det.id_producto">
+          <td>{{ det.nombre_producto }}</td>
+          <td>{{ det.cantidad }}</td>
+          <td>{{ det.tiempo_Pre || '—' }}</td>
+          <td>{{ det.subtotal }} Bs.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:1.5rem; font-weight:bold; text-align:right;">
+      Total: {{ detalleSeleccionado.total }} Bs.
+    </p>
+
+    <div style="text-align:center; margin-top:2rem;">
+      <button class="btn-detail" @click="imprimirTicket">Imprimir Ticket</button>
+    </div>
+  </div>
+</div>
+  </main>
+</div>
+<script>
+const { createApp, ref, computed, onMounted, watch } = Vue;
+
+createApp({
+  setup() {
+    const usuario = JSON.parse(localStorage.getItem('usuarioLogueado') || '{}');
+    const nombreEmpleado = ref(usuario.nombre || 'Encargado');
+    const nombreRestaurante = ref('Cargando...');
+    const fechaHoy = ref(new Date().toLocaleDateString('es-BO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+
+    const tipo = ref('local');
+    const filtroEstado = ref('');
+    const filtroCliente = ref('');
+    const pedidos = ref([]);
+    const cargando = ref(true);
+    const mostrarDetalle = ref(false);
+    const detalleSeleccionado = ref({ id: null, items: [], total: 0 });
+
+     const hora = ref('');
+const tick = () => {
+      hora.value = new Date().toLocaleTimeString('es-BO', { hour12: false });
+    };
+    tick();
+    setInterval(tick, 1000);
+
+    const cargarRestaurante = async () => {
+      try {
+        const res = await fetch('../../backend/encargado/menuencargado.php', {
+          method: 'POST',
+          body: new URLSearchParams({ ci: usuario.ci || '' })
+        });
+        const data = await res.json();
+        nombreRestaurante.value = data.success ? data.nombre_restaurante : 'No encontrado';
+      } catch {}
+    };
+
+    const cargarDatos = async () => {
+      cargando.value = true;
+      console.log('Cargando para tipo:', tipo.value);
+      try {
+        const res = await fetch('../../backend/encargado/pedidosactu.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            ci: usuario.ci || '',
+            tipo: tipo.value
+          })
+        });
+        const data = await res.json();
+        console.log('Respuesta:', data);
+        if (data.success) {
+          pedidos.value = data.items || [];
+        } else {
+          alert(data.message || 'Error al cargar');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error de conexión');
+      } finally {
+        cargando.value = false;
+      }
+    };
+
+    const pedidosFiltrados = computed(() => {
+      return pedidos.value.filter(p => {
+        if (!p) return false;
+        const matchEstado = !filtroEstado.value || p.estado === filtroEstado.value;
+        const matchCliente = !filtroCliente.value || 
+          (p.nombre_cliente || '').toLowerCase().includes(filtroCliente.value.toLowerCase());
+        return matchEstado && matchCliente;
+      });
+    });
+
+    const getNombreEstado = (estado) => {
+      const estados = { 'R': 'Registrado', 'P': 'En preparación', 'L': 'Listo', 'C': 'En camino', 'E': 'Entregado' };
+      return estados[estado] || estado || '—';
+    };
+
+    const cambiarEstado = async (id, nuevoEstado) => {
+      if (!id) return console.warn('ID no válido');
+      if (!confirm(`¿Cambiar a "${getNombreEstado(nuevoEstado)}"?`)) return;
+
+      try {
+        const res = await fetch('../../backend/encargado/pedidosactu.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            action: 'cambiar_estado',
+            tipo: tipo.value,
+            id: id,
+            nuevo_estado: nuevoEstado,
+            ci: usuario.ci || ''
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const idx = pedidos.value.findIndex(p => p && p.id === id);
+          if (idx !== -1) pedidos.value[idx].estado = nuevoEstado;
+          alert('Estado actualizado');
+        } else {
+          alert(data.message || 'Error');
+        }
+      } catch (err) {
+        alert('Error de conexión');
+      }
+    };
+
+  const verDetalle = async (item) => {
+  if (!item?.id) return;
+  try {
+    const res = await fetch('../../backend/encargado/pedidosactu.php', {
+      method: 'POST',
+      body: new URLSearchParams({
+        action: 'detalle',
+        tipo: tipo.value,
+        id: item.id,
+        ci: usuario.ci || ''
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      detalleSeleccionado.value = {
+        id: item.id,
+        items: data.detalles,
+        total: item.total || 0,
+        nombre_cliente: data.nombre_cliente || 'Cliente no registrado'  
+      };
+      mostrarDetalle.value = true;
+    } else {
+      alert(data.message);
+    }
+  } catch (err) {
+    alert('Error al cargar detalle');
+  }
+};
+
+    const imprimirTicket = () => {
+  const cliente = detalleSeleccionado.value.nombre_cliente || 'Cliente no registrado';
+  const ticket = `
+****************************************
+          Cocina
+****************************************
+N° Orden: #${detalleSeleccionado.value.id}
+Cliente: ${cliente}
+Fecha/Hora: ${new Date().toLocaleString('es-BO')}
+****************************************
+
+${detalleSeleccionado.value.items.map(det => 
+  `${det.cantidad.toString().padStart(5, ' ')}  ${det.nombre_producto}  (${det.tiempo_Pre || '—'})`
+).join('\n')}
+
+****************************************
+Total: ${detalleSeleccionado.value.total} Bs.
+****************************************
+  `;
+
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <pre style="font-family: monospace; font-size: 12px; margin: 20px; white-space: pre-wrap;">
+      ${ticket}
+    </pre>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+};
+
+    watch(tipo, () => {
+      filtroEstado.value = '';
+      filtroCliente.value = '';
+      cargarDatos();
+    });
+
+    onMounted(() => {
+      cargarRestaurante();
+      cargarDatos();
+    });
+
+    return {
+      nombreEmpleado,
+      nombreRestaurante,
+      fechaHoy,
+      tipo,
+      filtroEstado,
+      filtroCliente,
+      pedidosFiltrados,
+      cargando,
+      mostrarDetalle,
+      detalleSeleccionado,
+      getNombreEstado,
+      cambiarEstado,
+      verDetalle,
+      hora,
+      imprimirTicket
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

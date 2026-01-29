@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodCourt - Registrar Venta Local</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Poppins', sans-serif; background: #1e1e24; color: #fff8f0; min-height: 100vh; display: flex; flex-direction: column; }
+   header {
+      background: #91240c;
+      padding: 1rem 1rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-image: url('../../media/fondorojo1.jpg');
+      background-size: cover;
+    }
+.logo {
+      border: double;
+      background-color: #e5a657;
+      border-color: #c93616;
+      border-width: 8px;
+      margin-bottom: 0.2rem;
+      text-align: center;
+    } 
+    .logo-center h1 { font-size: 1.8rem; color: #ffcf99; margin-bottom: 0.3rem; }
+    .logo-center .restaurant-name {
+      font-size: 1.5rem;
+      color: #ffcf99;
+      font-weight: 600;
+      opacity: 1.5;
+      margin-bottom: 0rem;
+    }
+
+    .user-info {
+      font-size: 1rem;
+      color: #ffffff;
+      font-weight: 700;
+
+    }
+
+    .date-info {
+      font-size: 0.95rem;
+      color: #fdfdfd;
+      font-weight: 700;
+    }
+    nav { background: #92140c; padding: 1rem; display: flex; justify-content: center; gap: 2.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.4); flex-wrap: wrap; }
+    nav a { color: #fff8f0; text-decoration: none; font-size: 1.1rem; font-weight: 500; padding: 0.6rem 1.2rem; border-radius: 8px; transition: all 0.3s ease; }
+    nav a:hover, nav a.active { background: #ffcf99; color: #1e1e24; }
+    main { flex: 1; padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+    h2 { font-size: 2.2rem; color: #ffcf99; margin-bottom: 1.5rem; text-align: center; }
+    .section { background: rgba(255,248,240,0.05); border: 1px solid #ffcf99; border-radius: 12px; padding: 1.8rem; margin-bottom: 2rem; }
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #ffcf99; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 0.8rem; border: none; border-radius: 8px; background: #2a2a32; color: #fff8f0; font-size: 1rem;
+    }
+    .form-group input:focus, .form-group select:focus { outline: none; box-shadow: 0 0 0 3px #ffcf99; }
+    .cart { margin-top: 2rem; }
+    .cart-item { display: flex; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid #444; }
+    .cart-total { font-size: 1.3rem; font-weight: bold; text-align: right; margin-top: 1rem; color: #ffcf99; }
+    .btn-add, .btn-pay, .btn-finish, .btn-export {
+      background: linear-gradient(135deg, #ffcf99, #ffb366);
+      color: #1e1e24; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600;
+      transition: all 0.3s; margin-top: 1rem;
+    }
+    .btn-add:hover, .btn-pay:hover, .btn-finish:hover, .btn-export:hover {
+      transform: scale(1.05); box-shadow: 0 4px 12px rgba(255,207,153,0.4);
+    }
+    .qr-container { text-align: center; margin: 2rem 0; }
+    .qr-code { width: 200px; height: 200px; background: #fff; margin: 1rem auto; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #000; }
+    .factura { background: #fff; color: #000; padding: 1.5rem; border-radius: 12px; max-width: 600px; margin: 2rem auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    .factura h3 { color: #92140c; text-align: center; margin-bottom: 1rem; font-size: 1.6rem; }
+    .factura .header { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+    .factura .info { margin-bottom: 1rem; }
+    .factura table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    .factura th, .factura td { padding: 0.6rem; border-bottom: 1px solid #ddd; text-align: left; }
+    .factura .total { font-weight: bold; text-align: right; font-size: 1.2rem; margin-top: 1rem; }
+    .loading { text-align: center; font-size: 1.3rem; color: #ffcf99; margin: 3rem 0; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="date-info">
+      Fecha: {{ fechaHoy }} <br>
+      Hora: {{ hora }} <br>
+    </div>
+    <div class="logo-center">
+      <div class="logo"><img src="../../media/logo1.png" width="180" height="80"></div>
+ 
+      <div class="restaurant-name">Restaurante: {{ nombreRestaurante }}</div>
+    </div>
+    <div class="user-info">Encargado: {{ nombreEmpleado }}</div>
+  </header>
+
+  <nav>
+    <a href="menuencargado.html">Inicio</a>
+    <a href="productos.html">Gestión de Productos</a>
+    <a href="pedidosA.html">Pedidos Actuales</a>
+    <a href="pedidosF.html">Pedidos Finalizados</a>
+    <a href="venta.html" class="active">Registrar Venta</a>
+  </nav>
+
+  <main>
+    <h2>Registrar Venta Local</h2>
+
+    <div class="section">
+      <div class="form-group">
+        <label>Buscar producto</label>
+        <input v-model="busquedaProducto" placeholder="Nombre o categoría..." @input="filtrarProductos">
+      </div>
+
+      <div v-if="productosFiltrados.length > 0" style="max-height: 300px; overflow-y: auto; margin-top: 1rem;">
+        <div v-for="prod in productosFiltrados" :key="prod.id_producto" class="cart-item">
+          <div>{{ prod.nombre }} - {{ prod.precio_u }} Bs. ({{ prod.disponible == 1 ? 'Disponible' : 'No disponible' }})</div>
+          <button class="btn-add" @click="agregarAlCarrito(prod)" :disabled="prod.disponible != 1">+ Agregar</button>
+        </div>
+      </div>
+      <div v-else style="text-align:center; margin:1rem 0; color:#aaa;">No se encontraron productos</div>
+    </div>
+
+    <div class="section cart">
+      <h3>Carrito de Venta</h3>
+      <div v-if="carrito.length === 0" style="text-align:center; color:#aaa;">El carrito está vacío</div>
+      <div v-else>
+        <div v-for="(item, index) in carrito" :key="index" class="cart-item">
+          <div>{{ item.nombre }} × {{ item.cantidad }} = {{ (item.precio_u * item.cantidad).toFixed(2) }} Bs.</div>
+          <button @click="quitarDelCarrito(index)" style="background:#92140c; color:#fff; border:none; padding:0.4rem 0.8rem; border-radius:6px; cursor:pointer;">X</button>
+        </div>
+
+        <div class="cart-total">
+          Total a pagar: {{ totalCarrito.toFixed(2) }} Bs.
+        </div>
+
+        <div class="form-group" style="margin-top:1.5rem;">
+          <label>Tipo de documento para factura</label>
+          <select v-model="tipoDocumento">
+            <option value="CI">CI</option>
+            <option value="Pasaporte">Pasaporte</option>
+            <option value="NIT">NIT</option>
+          </select>
+        </div>
+
+        <div class="form-group" v-if="tipoDocumento">
+          <label>Número de {{ tipoDocumento }}</label>
+          <input v-model="numeroDocumento" placeholder="Ej: 846434013" required maxlength="11" minlength="7">
+        </div>
+
+        <div class="form-group">
+          <label>Nombre / Razón Social (para factura)</label>
+          <input v-model="nombreFactura" placeholder="Nombre o Razón Social" required>
+        </div>
+
+        <div class="form-group">
+          <label>Correo electrónico</label>
+          <input
+  v-model="correoFactura"
+  type="email"
+  required
+  pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+  title="ejemplo@correo.com">
+        </div>
+
+        <div class="form-group">
+          <label>Teléfono móvil</label>
+          <input v-model="telefonoFactura" placeholder="60512744" required maxlength="8" minlength="8">
+        </div>
+
+        <div class="form-group">
+          <label>Comentarios</label>
+          <input v-model="comentariosFactura" placeholder="Comentarios adicionales">
+        </div>
+
+        <button class="btn-pay" @click="simularPago" :disabled="carrito.length === 0">
+          Generar Pago QR y Factura
+        </button>
+      </div>
+    </div>
+
+    <div v-if="mostrarQR" class="section qr-container">
+      <h3>Pago con QR</h3>
+      <div class="qr-code">QR<br>Escanea para pagar {{ totalCarrito.toFixed(2) }} Bs.</div>
+      <p style="margin-top:1rem;">Esperar confirmación</p>
+      <button class="btn-finish" @click="confirmarVenta">Confirmar y Generar Factura</button>
+    </div>
+
+    <div v-if="facturaGenerada" class="section factura">
+      <div class="header">
+        <div>
+          <strong>FoodCourt - {{ nombreRestaurante }}</strong><br>
+          Fecha: {{ factura.fecha }}
+        </div>
+        <div style="text-align:right;">
+          Factura #{{ factura.id }}<br>
+          Venta Local - Entrega en persona
+        </div>
+      </div>
+
+      <div class="info">
+        <strong>Cliente:</strong> {{ factura.nombreFactura || 'Consumidor final' }}<br>
+        <strong>Documento:</strong> {{ factura.tipoDocumento ? factura.tipoDocumento + ': ' + factura.numeroDocumento : 'Sin documento' }}<br>
+        <strong>Correo:</strong> {{ factura.correoFactura || '—' }}<br>
+        <strong>Teléfono:</strong> {{ factura.telefonoFactura || '—' }}
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio Unit.</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in factura.items" :key="item.id_producto">
+            <td>{{ item.nombre }}</td>
+            <td>{{ item.cantidad }}</td>
+            <td>{{ (item.precio_u * item.cantidad).toFixed(2) }} Bs.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="total">
+        Total: {{ factura.total.toFixed(2) }} Bs.
+      </div>
+
+      <div style="text-align:center; margin-top:2rem;">
+        <button class="btn-export" @click="exportarPDF">Exportar Factura como PDF</button>
+        <button class="btn-export" @click="nuevaVenta" style="margin-left:1rem;">Nueva Venta</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const { createApp, ref, computed, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const usuario = JSON.parse(localStorage.getItem('usuarioLogueado') || '{}');
+    const nombreEmpleado = ref(usuario.nombre || 'Encargado');
+    const nombreRestaurante = ref('Cargando...');
+    const fechaHoy = ref(new Date().toLocaleDateString('es-BO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+
+      const hora = ref('');
+const tick = () => {
+      hora.value = new Date().toLocaleTimeString('es-BO', { hour12: false });
+    };
+    tick();
+    setInterval(tick, 1000);
+
+    const busquedaProducto = ref('');
+    const productos = ref([]);
+    const carrito = ref([]);
+
+    const tipoDocumento = ref('');
+    const numeroDocumento = ref('');
+    const nombreFactura = ref('');
+    const correoFactura = ref('');
+    const telefonoFactura = ref('');
+
+    const mostrarQR = ref(false);
+    const facturaGenerada = ref(false);
+    const factura = ref({ id: null, fecha: '', nombreFactura: '', tipoDocumento: '', numeroDocumento: '', correoFactura: '', telefonoFactura: '', total: 0, items: [] });
+
+    const cargarRestaurante = async () => {
+      try {
+        const res = await fetch('../../backend/encargado/menuencargado.php', {
+          method: 'POST',
+          body: new URLSearchParams({ ci: usuario.ci || '' })
+        });
+        const data = await res.json();
+        nombreRestaurante.value = data.success ? data.nombre_restaurante : 'No encontrado';
+      } catch {}
+    };
+
+    const cargarProductos = async () => {
+      try {
+        const res = await fetch('../../backend/encargado/productos.php', {
+          method: 'POST',
+          body: new URLSearchParams({
+            action: 'listar',
+            ci: usuario.ci || ''
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          productos.value = data.productos.filter(p => p.disponible == 1);
+        }
+      } catch {}
+    };
+
+    const productosFiltrados = computed(() => {
+      if (!busquedaProducto.value) return productos.value;
+      const term = busquedaProducto.value.toLowerCase();
+      return productos.value.filter(p => 
+        p.nombre.toLowerCase().includes(term)
+      );
+    });
+
+    const agregarAlCarrito = (producto) => {
+      const existe = carrito.value.find(i => i.id_producto === producto.id_producto);
+      if (existe) existe.cantidad++;
+      else carrito.value.push({ ...producto, cantidad: 1 });
+    };
+
+    const quitarDelCarrito = (index) => {
+      carrito.value.splice(index, 1);
+    };
+
+    const totalCarrito = computed(() => {
+      return carrito.value.reduce((sum, i) => sum + (i.precio_u * i.cantidad), 0);
+    });
+
+    const simularPago = () => {
+      if (carrito.value.length === 0) return alert('El carrito está vacío');
+      mostrarQR.value = true;
+    };
+
+    const confirmarVenta = async () => {
+      try {
+        const itemsParaEnviar = carrito.value.map(i => ({
+          id_producto: i.id_producto,
+          cantidad: i.cantidad,
+          subtotal: i.precio_u * i.cantidad
+        }));
+
+        const res = await fetch('../../backend/encargado/venta.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            ci: usuario.ci || '',
+            items: JSON.stringify(itemsParaEnviar),
+            total: totalCarrito.value,
+            metodo_pago: 'QR'
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          factura.value = {
+            id: data.id_venta,
+            fecha: new Date().toLocaleString('es-BO'),
+            nombreFactura: nombreFactura.value || 'Consumidor final',
+            tipoDocumento: tipoDocumento.value,
+            numeroDocumento: numeroDocumento.value,
+            correoFactura: correoFactura.value,
+            telefonoFactura: telefonoFactura.value,
+            total: totalCarrito.value,
+            items: carrito.value
+          };
+          facturaGenerada.value = true;
+          mostrarQR.value = false;
+          carrito.value = [];
+        } else {
+          alert(data.message || 'Error al registrar');
+        }
+      } catch (err) {
+        alert('Error de conexión');
+      }
+    };
+
+    const exportarPDF = () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFontSize(18);
+      doc.text('FoodCourt - Factura de Venta', 105, 20, { align: 'center' });
+
+      doc.setFontSize(12);
+      doc.text(`Factura #${factura.value.id}`, 20, 35);
+      doc.text(`Fecha: ${factura.value.fecha}`, 20, 45);
+      doc.text(`Restaurante: ${nombreRestaurante.value}`, 20, 55);
+
+      doc.text('Cliente:', 20, 70);
+      doc.text(factura.value.nombreFactura || 'Consumidor final', 60, 70);
+      if (factura.value.tipoDocumento) {
+        doc.text(`${factura.value.tipoDocumento}: ${factura.value.numeroDocumento || '—'}`, 20, 78);
+      }
+      doc.text(`Correo: ${factura.value.correoFactura || '—'}`, 20, 86);
+      doc.text(`Teléfono: ${factura.value.telefonoFactura || '—'}`, 20, 94);
+
+      doc.text('Detalle:', 20, 110);
+
+      let y = 120;
+      factura.value.items.forEach(item => {
+        doc.text(`${item.nombre} × ${item.cantidad}`, 20, y);
+        doc.text(`${(item.precio_u * item.cantidad).toFixed(2)} Bs.`, 170, y, { align: 'right' });
+        y += 10;
+      });
+
+      doc.setFontSize(14);
+      doc.text(`Total: ${factura.value.total.toFixed(2)} Bs.`, 170, y + 10, { align: 'right' });
+
+      doc.save(`factura_${factura.value.id}.pdf`);
+    };
+
+    const nuevaVenta = () => {
+      facturaGenerada.value = false;
+      factura.value = { id: null, fecha: '', nombreFactura: '', tipoDocumento: '', numeroDocumento: '', correoFactura: '', telefonoFactura: '', total: 0, items: [] };
+      tipoDocumento.value = '';
+      numeroDocumento.value = '';
+      nombreFactura.value = '';
+      correoFactura.value = '';
+      telefonoFactura.value = '';
+    };
+
+    onMounted(() => {
+      cargarRestaurante();
+      cargarProductos();
+    });
+
+    return {
+      nombreEmpleado,
+      nombreRestaurante,
+      fechaHoy,
+      busquedaProducto,
+      productosFiltrados,
+      carrito,
+      totalCarrito,
+      tipoDocumento,
+      numeroDocumento,
+      nombreFactura,
+      correoFactura,
+      telefonoFactura,
+      mostrarQR,
+      facturaGenerada,
+      factura,
+      agregarAlCarrito,
+      quitarDelCarrito,
+      simularPago,
+      confirmarVenta,
+      exportarPDF,
+      nuevaVenta,
+      hora
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

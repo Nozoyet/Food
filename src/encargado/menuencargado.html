@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodCourt - Menú Encargado</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #1e1e24;
+      color: #fff8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      
+    }
+
+    header {
+      background: #91240c;
+      padding: 1rem 1rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-image: url('../../media/fondorojo1.jpg');
+  
+    }
+
+    .logo {
+      border: double;
+      background-color: #e5a657;
+      border-color: #91240c;
+      border-width: 8px;
+      margin-bottom: 0.2rem;
+      text-align: center;
+    }
+    
+
+    .logo-center .restaurant-name {
+      font-size: 1.5rem;
+      color: #ffcf99;
+      font-weight: 600;
+      opacity: 1.5;
+      margin-bottom: 0rem;
+    }
+
+    .user-info {
+      font-size: 1rem;
+      color: #ffffff;
+      font-weight: 700;
+
+    }
+
+    .date-info {
+      font-size: 0.95rem;
+      color: #fdfdfd;
+      font-weight: 700;
+    }
+     nav {
+      background: #92140c;
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      flex-wrap: wrap;
+      
+    }
+
+    nav a {
+      color: #fff8f0;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 500;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    nav a:hover,
+    nav a.active {
+      background: #ffcf99;
+      color: #1e1e24;
+    }
+
+    main {
+      flex: 1;
+      padding: 3rem 2rem;
+      text-align: center;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    h2 {
+      font-size: 2.2rem;
+      color: #ffcf99;
+      margin-bottom: 1.5rem;
+    }
+
+    .welcome-text {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto 3rem;
+      color: #fff8f0;
+      opacity: 0.95;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .action-card {
+      background: rgba(255,248,240,0.08);
+      border: 1px solid #ffcf99;
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+      transition: all 0.35s ease;
+      backdrop-filter: blur(6px);
+      text-align: center;
+    }
+
+    .action-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px rgba(255,207,153,0.18);
+      border-color: #fff8f0;
+    }
+
+    .action-question {
+      font-size: 1.15rem;
+      color: #ffcf99;
+      margin-bottom: 1.2rem;
+      font-weight: 500;
+    }
+
+    .btn-action {
+      background: linear-gradient(135deg, #ffcf99, #ffb366);
+      color: #1e1e24;
+      border: none;
+      padding: 1rem 2.2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .btn-action:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(255,207,153,0.4);
+    }
+    @media (max-width: 768px) {
+  nav {
+    flex-direction: column; 
+    padding: 0.5rem 0rem; 
+  }
+
+  nav a {
+    font-size: 1rem; 
+    padding: 0.5rem 0rem;
+    width: 100%; 
+    text-align: center;
+  }
+
+  main {
+    padding: 2rem 1rem; 
+  }
+
+  h2 {
+    font-size: 1.8rem; 
+  }
+
+  .welcome-text {
+    font-size: 1rem; 
+  }
+
+}
+
+@media (max-width: 480px) {
+  h2 {
+    font-size: 1.5rem; 
+  }
+
+  .action-card {
+    padding: 1rem; 
+  }
+
+  .btn-action {
+    padding: 0.8rem;     
+    font-size: 1rem; 
+  }
+}
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="date-info">
+      Fecha: {{ fechaHoy }} <br>
+      Hora: {{ hora }} <br>
+    </div>
+    
+    <div class="logo-center">
+      <div class="logo"><img src="../../media/logo1.png" width="180" height="80"></div>
+      <div class="restaurant-name">Restaurante: {{ nombreRestaurante }}</div>
+    </div>
+    
+    <div class="user-info">
+      Encargado: {{ nombreEmpleado }}
+    </div>
+  </header>
+
+  <nav>
+    <a href="menuencargado.html" class="active">Inicio</a>
+    <a href="productos.html">Gestión de Productos</a>
+    <a href="pedidosA.html">Pedidos Actuales</a>
+    <a href="pedidosF.html">Pedidos Finalizados</a>
+    <a href="venta.html">Registrar Venta</a>
+  </nav>
+
+  <main>
+    <h2>¡Bienvenido, {{ nombreEmpleado }}!</h2>
+    
+    <div class="actions">
+      <div class="action-card">
+        <div class="action-question">¿Quieres modificar tu menú?</div>
+        <button class="btn-action" @click="irAGestionProductos">Ir a Gestión de Productos</button>
+      </div>
+
+      <div class="action-card">
+        <div class="action-question">Consulta los pedidos pendientes</div>
+        <button class="btn-action" @click="irAPedidosActuales">Ver Pedidos Actuales</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const { createApp, ref, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const usuarioLogueado = JSON.parse(localStorage.getItem('usuarioLogueado') || '{}');
+    const nombreEmpleado = ref(usuarioLogueado.nombre || 'Encargado');
+    const ciEmpleado = ref(usuarioLogueado.ci || null);
+    const nombreRestaurante = ref('Cargando...');
+
+    const hoy = new Date();
+    const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const fechaHoy = ref(hoy.toLocaleDateString('es-BO', opcionesFecha));
+    
+    const hora = ref('');
+const tick = () => {
+      hora.value = new Date().toLocaleTimeString('es-BO', { hour12: false });
+    };
+    tick();
+    setInterval(tick, 1000);
+
+
+
+    const cargarRestaurante = async () => {
+      try {
+        const res = await fetch('../../backend/encargado/menuencargado.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ ci: usuarioLogueado.ci || '' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          nombreRestaurante.value = data.nombre_restaurante;
+        } else {
+          nombreRestaurante.value = 'No encontrado';
+        }
+      } catch (err) {
+        nombreRestaurante.value = 'Error';
+      }
+    };
+
+    onMounted(() => {
+      cargarRestaurante();
+    });
+
+    const irAGestionProductos = () => {
+      window.location.href = 'productos.html';
+    };
+
+    const irAPedidosActuales = () => {
+      window.location.href = 'pedidosA.html';
+    };
+
+    return {
+      nombreEmpleado,
+      nombreRestaurante,
+      fechaHoy,
+      irAGestionProductos,
+      irAPedidosActuales,
+      hora
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

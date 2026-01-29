@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodCourt - Gestión de Productos</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #1e1e24;
+      color: #fff8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+  header {
+      background: #91240c;
+      padding: 1rem 1rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-image: url('../../media/fondorojo3.png');
+      background-blend-mode: soft-light;
+      background-color: #ffcf9946;
+    }
+
+     .logo {
+      border: double;
+      background-color: #e5a657;
+      border-color: #c93616;
+      border-width: 8px;
+      margin-bottom: 0.2rem;
+      text-align: center;
+    }
+
+    .logo-center h1 {
+      font-size: 1.8rem;
+      color: #680707;
+      margin-bottom: 0.3rem;
+    }
+
+    .logo-center .restaurant-name {
+      font-size: 1.4rem;
+      color: #680707;
+      opacity: 0.9;
+      font-weight: 670;
+    }
+
+    .user-info {
+      font-size: 1.2rem;
+      color: #680707;
+      font-weight: 650;
+      opacity: 0.9;
+    }
+
+    .date-info {
+      font-size: 1.2rem;
+      color: #680707;
+      opacity: 0.9;
+      font-weight: 650;
+
+    }
+
+    nav {
+      background: #c74524;
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: #ffcf99;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 500;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    nav a:hover,
+    nav a.active {
+      background: #ffcf99;
+      color: #1e1e24;
+    }
+
+    main {
+      flex: 1;
+      padding: 3rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    h2 {
+      font-size: 2.2rem;
+      color: #ffcf99;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .filters {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-input {
+      flex: 1;
+      min-width: 250px;
+      padding: 0.8rem 1.2rem;
+      border: none;
+      border-radius: 0px;
+      background: #2a2a32;
+      color: #fff8f0;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .filter-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px #ffcf99;
+      background: #33333b;
+    }
+
+    .autocomplete-dropdown {
+      position: absolute;
+      background: #2a2a32;
+      border: 1px solid #ffcf99;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 50;
+      width: inherit;
+    }
+
+    .autocomplete-item {
+      padding: 0.8rem 1.2rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .autocomplete-item:hover {
+      background: #ffcf99;
+      color: #1e1e24;
+    }
+
+    .products-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 1rem;
+      overflow-x: auto;
+    }
+@media (max-width: 768px) {
+  .products-table {
+    display: block; 
+    overflow-x: auto; 
+    white-space: nowrap; 
+  }
+
+ 
+}
+    .products-table th {
+      text-align: left;
+      padding: 1rem;
+      background: #184061;
+      color: #f1b94f;
+      font-weight: 600;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .products-table td {
+      padding: 1rem;
+      background: rgba(255,248,240,0.05);
+      border-bottom: 1px solid #ffcf99;
+    }
+
+    .product-img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .available-toggle {
+      background: none;
+      border: none;
+      color: #fff8f0;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+
+    .available-toggle.available {
+      background: #4caf50;
+    }
+
+    .available-toggle.not-available {
+      background: #92140c;
+    }
+
+    .available-toggle:hover {
+      opacity: 0.85;
+    }
+
+    .btn-edit {
+      background: #ffcf99;
+      color: #1e1e24;
+      font-size: 1rem;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+
+    .btn-edit:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(255,207,153,0.4);
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal.show {
+      opacity: 1;
+    }
+
+    .modal-content {
+  background: #fff8f062;
+  color: #1e1e24;
+  font-weight: 500;
+  padding: 2rem; 
+  border-radius: 0px;
+  max-width: 600px; 
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto; 
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+    .modal.show .modal-content {
+      transform: scale(1);
+    }
+
+    .modal h3 {
+      font-size: 1.8rem;
+      color: #d83125;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal label {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .modal input,
+    .modal textarea,
+    .modal select {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1.2rem;
+      border: 1px solid #111d4a;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .modal .btn-save {
+      background: linear-gradient(135deg, #ffcf99, #ffb366);
+      color: #1e1e24;
+      border: none;
+      padding: 1rem;
+      width: 100%;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .modal .btn-save:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(255,207,153,0.4);
+    }
+
+    .modal .btn-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #92140c;
+    }
+
+    .error-message {
+      color: #92140c;
+      font-size: 0.95rem;
+      margin-top: -1rem;
+      margin-bottom: 1rem;
+    }
+
+    .loading {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #ffcf99;
+      margin: 2rem 0;
+    }
+    .btn-action {
+  background: linear-gradient(135deg, #ffcf99, #ffb366);
+  color: #1e1e24;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-action:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 207, 153, 0.4);
+}
+
+ @media (max-width: 768px) {
+  nav {
+    flex-direction: column; 
+    padding: 0.5rem 0rem; 
+  }
+
+  nav a {
+    font-size: 1rem; 
+    padding: 0.5rem 0rem;
+    width: 100%; 
+    text-align: center;
+  }
+
+  main {
+    padding: 2rem 1rem; 
+  }
+
+  h2 {
+    font-size: 1.8rem; 
+  }
+
+  .welcome-text {
+    font-size: 1rem; 
+  }
+
+}
+
+@media (max-width: 480px) {
+  h2 {
+    font-size: 1.5rem; 
+  }
+
+  .action-card {
+    padding: 1rem; 
+  }
+
+  .btn-action {
+    padding: 0.8rem;     
+    font-size: 1rem; 
+  }
+}
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="date-info">
+      Fecha: {{ fechaHoy }} <br>
+      Hora: {{ hora }} <br>
+    </div>
+    
+    <div class="logo-center">
+      <div class="logo"><img src="../../media/logo1.png" width="180" height="80"></div>
+      <div class="restaurant-name">Restaurante: {{ nombreRestaurante }}</div>
+    </div>
+    
+    <div class="user-info">
+      Encargado: {{ nombreEmpleado }}
+    </div>
+  </header>
+
+  <nav>
+    <a href="menuencargado.html">Inicio</a>
+    <a href="productos.html" class="active">Gestión de Productos</a>
+    <a href="pedidosA.html">Pedidos Actuales</a>
+    <a href="pedidosF.html">Pedidos Finalizados</a>
+    <a href="ventas.html">Registrar Venta</a>
+  </nav>
+
+  <main>
+      <h2>Gestión de Productos</h2>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap;">
+    <div class="filters">
+      <select v-model="filtroCategoria" class="filter-input">
+        <option value="">Todas las categorías</option>
+        <option v-for="cat in categorias" :key="cat.id_categoria" :value="cat.id_categoria">
+          {{ cat.nombre }}
+        </option>
+      </select>
+
+      <div style="position: relative; flex: 1;">
+        <input 
+          v-model="filtroNombre" 
+          class="filter-input" 
+          placeholder="Buscar por nombre..." 
+          @input="filtrarProductos"
+        >
+        <div v-if="autocompleteOptions.length > 0" class="autocomplete-dropdown">
+          <div 
+            v-for="option in autocompleteOptions" 
+            :key="option.id_producto" 
+            class="autocomplete-item"
+            @click="seleccionarNombre(option.nombre)"
+          >
+            {{ option.nombre }}
+          </div>
+        </div>
+      </div>
+      <button class="btn-action" @click="abrirModalNuevo">
+      + Agregar Nuevo Producto
+    </button>
+    </div>
+
+    
+  </div>
+
+    <div v-if="cargandoProductos" class="loading">Cargando productos...</div>
+
+    <table v-else class="products-table">
+      <thead>
+        <tr>
+          <th>Foto</th>
+          <th>Nombre</th>
+          <th>Precio</th>
+          <th>Descripción</th>
+          <th>Tiempo Prep.</th>
+          <th>Disponible</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="producto in productosFiltrados" :key="producto.id_producto">
+          <td><img :src="producto.foto" alt="Foto producto" class="product-img"></td>
+          <td>{{ producto.nombre }}</td>
+          <td>{{ producto.precio_u }} Bs.</td>
+          <td>{{ producto.descripcion }}</td>
+          <td>{{ producto.tiempo_Pre }}</td>
+          <td>
+            <button 
+              class="available-toggle" 
+              :class="{ 'available': producto.disponible == 1, 'not-available': producto.disponible == 0 }"
+              @click="toggleDisponible(producto.id_producto, producto.disponible)"
+            >
+              {{ producto.disponible == 1 ? 'Disponible' : 'No disponible' }}
+            </button>
+          </td>
+          <td>
+            <button class="btn-edit" @click="abrirModalEditar(producto)">
+              Editar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    
+<div v-if="mostrarModal" class="modal" :class="{ show: mostrarModal }" @click="cerrarModal">
+  <div class="modal-content" @click.stop>
+    <button class="btn-close" @click="cerrarModal">×</button>
+    <h3>{{ esNuevo ? 'Nuevo Producto' : 'Editar Producto' }}</h3>
+
+    <label>Nombre *</label>
+    <input v-model="formProducto.nombre" required>
+
+    <label>Categoría *</label>
+    <select v-model="formProducto.id_categoria" required>
+      <option value="" disabled>Selecciona una categoría</option>
+      <option v-for="cat in categorias" :key="cat.id_categoria" :value="cat.id_categoria">
+        {{ cat.nombre }}
+      </option>
+    </select>
+
+    <label>Precio Unitario (Bs.) *</label>
+    <input v-model="formProducto.precio_u" type="number" step="0.01" min="0.01" required>
+
+    <label>Descripción *</label>
+    <textarea v-model="formProducto.descripcion" rows="3" required></textarea>
+
+    <label>Tiempo de Preparación *</label>
+    <input v-model="formProducto.tiempo_Pre" placeholder="Ej: 15-20 min" required>
+
+    <label>URL de la Foto *</label>
+    <input v-model="formProducto.foto" placeholder="https://ejemplo.com/imagen.jpg" required>
+
+    <p v-if="mensajeErrorModal" class="error-message">{{ mensajeErrorModal }}</p>
+
+    <button class="btn-save" :disabled="cargandoEditar" @click="guardarProducto">
+      {{ cargandoEditar ? 'Guardando...' : (esNuevo ? 'Crear Producto' : 'Guardar Cambios') }}
+    </button>
+  </div>
+</div>
+  </main>
+</div>
+
+<script>
+const { createApp, ref, onMounted, computed } = Vue;
+
+createApp({
+  setup() {
+    const usuarioLogueado = JSON.parse(localStorage.getItem('usuarioLogueado') || '{}');
+    const nombreEmpleado = ref(usuarioLogueado.nombre || 'Encargado');
+    const nombreRestaurante = ref('Cargando...');
+    const fechaHoy = ref('');
+    const hoy = new Date();
+    const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    fechaHoy.value = hoy.toLocaleDateString('es-BO', opcionesFecha);
+  const hora = ref('');
+const tick = () => {
+      hora.value = new Date().toLocaleTimeString('es-BO', { hour12: false });
+    };
+    tick();
+    setInterval(tick, 1000);
+
+
+    const productos = ref([]);
+    const categorias = ref([]);
+    const filtroCategoria = ref('');
+    const filtroNombre = ref('');
+    const autocompleteOptions = ref([]);
+    const cargandoProductos = ref(true);
+    const mostrarModal = ref(false);
+    const formEditar = ref({});
+    const mensajeErrorModal = ref('');
+    const cargandoEditar = ref(false);
+    const esNuevo = ref(false);
+    const formProducto = ref({
+    nombre: '',
+    id_categoria: '',
+    precio_u: '',
+    descripcion: '',
+    tiempo_Pre: '',
+    foto: '',
+    disponible: 1  
+    });
+
+    const productosFiltrados = computed(() => {
+      return productos.value.filter(prod => {
+        const matchCategoria = !filtroCategoria.value || prod.id_categoria == filtroCategoria.value;
+        const matchNombre = !filtroNombre.value || prod.nombre.toLowerCase().includes(filtroNombre.value.toLowerCase());
+        return matchCategoria && matchNombre;
+      });
+    });
+
+    const cargarRestaurante = async () => {
+      try {
+        const res = await fetch('../../backend/encargado/menuencargado.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ ci: usuarioLogueado.ci || '' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          nombreRestaurante.value = data.nombre_restaurante;
+        } else {
+          nombreRestaurante.value = 'No encontrado';
+        }
+      } catch (err) {
+        nombreRestaurante.value = 'Error';
+      }
+    };
+
+    const cargarProductos = async () => {
+      cargandoProductos.value = true;
+      try {
+        const res = await fetch('../../backend/encargado/productos.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            action: 'listar',
+            ci: usuarioLogueado.ci || ''
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          productos.value = data.productos;
+          categorias.value = data.categorias;
+        } else {
+          alert(data.message || 'Error al cargar productos');
+        }
+      } catch (err) {
+        alert('Error de conexión');
+      } finally {
+        cargandoProductos.value = false;
+      }
+    };
+const resetForm = () => {
+  formProducto.value = {
+    nombre: '',
+    id_categoria: '',
+    precio_u: '',
+    descripcion: '',
+    tiempo_Pre: '',
+    foto: '',
+    disponible: 1
+  };
+  mensajeErrorModal.value = '';
+};
+const abrirModalNuevo = () => {
+  resetForm();
+  esNuevo.value = true;
+  mostrarModal.value = true;
+};
+
+    const filtrarProductos = () => {
+      if (filtroNombre.value.length >= 2) {
+        autocompleteOptions.value = productos.value
+          .filter(prod => prod.nombre.toLowerCase().includes(filtroNombre.value.toLowerCase()))
+          .slice(0, 5); 
+      } else {
+        autocompleteOptions.value = [];
+      }
+    };
+
+    const seleccionarNombre = (nombre) => {
+      filtroNombre.value = nombre;
+      autocompleteOptions.value = [];
+    };
+
+    const toggleDisponible = async (id_producto, actual) => {
+  const nuevo = actual == 1 ? 0 : 1;
+  try {
+    const res = await fetch('../../backend/encargado/productos.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        action: 'toggle_disponible',
+        id_producto: id_producto,
+        disponible: nuevo,               
+        ci: usuarioLogueado.ci || ''
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const prod = productos.value.find(p => p.id_producto == id_producto);
+      if (prod) {
+        prod.disponible = data.nuevo_valor;  
+      }
+    } else {
+      alert(data.message || 'Error al cambiar disponibilidad');
+    }
+  } catch (err) {
+    alert('Error de conexión al cambiar estado');
+  }
+};
+
+ 
+const abrirModalEditar = (producto) => {
+  formProducto.value = { ...producto };
+  esNuevo.value = false;
+  mostrarModal.value = true;
+  mensajeErrorModal.value = '';
+};
+
+    const cerrarModal = () => {
+      mostrarModal.value = false;
+    };
+
+  const guardarProducto = async () => {
+  mensajeErrorModal.value = '';
+  cargandoEditar.value = true;
+
+  if (!formProducto.value.nombre || !formProducto.value.id_categoria || 
+      !formProducto.value.precio_u || !formProducto.value.descripcion || 
+      !formProducto.value.tiempo_Pre || !formProducto.value.foto) {
+    mensajeErrorModal.value = 'Todos los campos con * son obligatorios';
+    cargandoEditar.value = false;
+    return;
+  }
+
+  try {
+    const res = await fetch('../../backend/encargado/productos.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        action: esNuevo.value ? 'crear' : 'editar',
+        id_producto: esNuevo.value ? null : formProducto.value.id_producto,
+        nombre: formProducto.value.nombre,
+        id_categoria: formProducto.value.id_categoria,
+        precio_u: formProducto.value.precio_u,
+        descripcion: formProducto.value.descripcion,
+        tiempo_Pre: formProducto.value.tiempo_Pre,
+        foto: formProducto.value.foto,
+        disponible: formProducto.value.disponible,
+        ci: usuarioLogueado.ci || ''
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      await cargarProductos();
+      cerrarModal();
+    } else {
+      mensajeErrorModal.value = data.message || 'Error al guardar';
+    }
+  } catch (err) {
+    mensajeErrorModal.value = 'Error de conexión';
+  } finally {
+    cargandoEditar.value = false;
+  }
+};
+
+    onMounted(() => {
+      cargarRestaurante();
+      cargarProductos();
+    });
+
+    return {
+      nombreEmpleado,
+      nombreRestaurante,
+      fechaHoy,
+      productos,
+      categorias,
+      filtroCategoria,
+      filtroNombre,
+      autocompleteOptions,
+      cargandoProductos,
+      productosFiltrados,
+      filtrarProductos,
+      seleccionarNombre,
+      toggleDisponible,
+      mostrarModal,
+      formEditar,
+      mensajeErrorModal,
+      cargandoEditar,
+      abrirModalEditar,
+      cerrarModal,
+      guardarProducto,
+      abrirModalNuevo,
+      esNuevo,
+      formProducto,
+      hora
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

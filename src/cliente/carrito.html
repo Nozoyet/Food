@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodCourt - Carrito</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { height:100%; margin:0; padding:0; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #1e1e24 !important;
+      color: #fff8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    #app { 
+      display: flex; 
+      flex-direction: column; 
+      min-height: 100vh; 
+      flex: 1; 
+    }
+
+    header {
+      background: #91240c;
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-image: url('../../media/fondorojo1.jpg');
+      background-size: cover;
+    }
+
+    .logo img { height: 70px; }
+
+    .nav-icons { display:flex; gap:1.8rem; font-size:1.6rem; color:#ffcf99; }
+    .nav-icons a { color:#ffcf99; text-decoration:none; transition:transform 0.2s; }
+    .nav-icons a:hover { transform:scale(1.15); }
+
+    main { 
+      padding:1.5rem; 
+      max-width:1200px; 
+      margin:0 auto; 
+      width:100%; 
+      flex:1; 
+    }
+
+    h2.section-title {
+      color: #ffcf99;
+      font-size: 1.8rem;
+      margin: 1rem 0;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .carrito-empty {
+      text-align: center;
+      font-size: 1.2rem;
+      opacity: 0.8;
+      margin: 3rem 0;
+    }
+
+    .carrito-item {
+      background: #2a2a32;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      border: 1px solid #ffcf99;
+    }
+
+    .carrito-item img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .item-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .item-nombre {
+      font-size: 1.1rem;
+      color: #ffcf99;
+    }
+
+    .item-subtotal {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    .item-cantidad {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .item-cantidad input {
+      width: 50px;
+      text-align: center;
+      background: #3a3a44;
+      color: #fff;
+      border: 1px solid #ffcf99;
+      border-radius: 6px;
+      padding: 0.5rem;
+    }
+
+    .item-check {
+      width: 20px;
+      height: 20px;
+      accent-color: #28a745;
+    }
+
+    .btn-eliminar {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-eliminar:hover {
+      background: #c82333;
+    }
+
+    .total-section {
+      background: #3a3a44;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-top: 2rem;
+      text-align: right;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .btn-pedir {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: block;
+      margin: 2rem auto 0;
+      transition: all 0.3s;
+    }
+
+    .btn-pedir:hover {
+      background: #218838;
+      transform: scale(1.05);
+    }
+    .user-info {
+      color: #ffcf99;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .user-info strong {
+      color: #fff8f0;
+    }
+
+    footer {
+      background: #91240c;
+      color: #ffcf99;
+      text-align: center;
+      padding: 1.5rem;
+      margin-top: auto;
+      font-size: 0.95rem;
+    }
+    .debug-message {
+      background: #ff4444;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      margin: 2rem;
+      border-radius: 8px;
+    }
+    @media (max-width: 768px) {
+      .carrito-item {
+        flex-direction: column;
+        text-align: center;
+      }
+      .item-info { align-items: center; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">
+      <img src="../../media/logo1.png" alt="FoodCourt Logo">
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 2.5rem;">
+      <div class="user-info" v-if="usuarioLogueado">
+        <strong>{{ usuarioLogueado.nombre }}</strong> 
+        <span>(CI: {{ usuarioLogueado.ci }})</span>
+      </div>
+      <div class="nav-icons">
+        <a href="#" class="volver-btn" @click.prevent="volver">← Volver</a>
+        <a href="menucliente.html">🍔</a>
+        <a href="carrito.html" title="Ver carrito">🛒</a>
+        <a href="#" @click.prevent="cerrarSesion" title="Cerrar sesión">🚪</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <h2 class="section-title">Carrito</h2>
+
+    <!-- Mensaje de depuración visible si Vue falla -->
+    <div v-if="!carrito && !pedidosEspera" class="debug-message">
+      Vue no se montó correctamente. Revisa la consola (F12).
+    </div>
+
+    <div v-if="carrito.length === 0" class="carrito-empty">
+      Tu carrito está vacío. ¡Agrega productos desde el menú!
+    </div>
+    <div v-else>
+      <div v-for="(item, index) in carrito" :key="index" class="carrito-item">
+        <img :src="item.foto" :alt="item.nombre">
+        <div class="item-info">
+          <div class="item-nombre">{{ item.nombre }}</div>
+          <div class="item-subtotal">
+            Subtotal: {{ Number(item.precio_u * item.cantidad) || '0.00' }} Bs
+          </div>
+          <div class="item-cantidad">
+            Cantidad:
+            <input type="number" v-model.number="item.cantidad" min="1" @change="actualizarCarrito">
+            <input type="checkbox" class="item-check" v-model="item.seleccionado" @change="actualizarCarrito">
+          </div>
+        </div>
+        <button class="btn-eliminar" @click="eliminarItem(index)">Eliminar</button>
+      </div>
+
+      <div class="total-section">
+        Total: {{ Number(totalSeleccionado) || '0.00' }} Bs
+      </div>
+
+      <button class="btn-pedir" @click="pedir" :disabled="totalSeleccionado === 0">
+        Pedir
+      </button>
+    </div>
+    <h2 class="section-title">Pedidos en Espera</h2>
+    <div v-if="errorPedidos" style="color:#ff6b6b; text-align:center; padding:1rem; background:rgba(255,107,107,0.15); border-radius:8px; margin:1rem 0;">
+      {{ errorPedidos }}
+    </div>
+    <div v-else-if="pedidosEspera.length === 0" class="carrito-empty">
+      No hay pedidos en espera.
+    </div>
+    <div v-else>
+      <div v-for="pedido in pedidosEspera" :key="pedido.id_pedido" class="pedido-item" style="background:#2a2a32; padding:1rem; border-radius:12px; margin-bottom:1rem;">
+        <div>Pedido #{{ pedido.id_pedido }} - Total: {{ Number(pedido.total) }} Bs</div>
+        <div>Razón Social: {{ pedido.razon_social }}</div>
+        <div>Estado: {{ estadoTexto(pedido.estado) }}</div>
+        <div>Fecha: {{ pedido.fecha }}</div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    FoodCourt © 2026 - Todos los derechos reservados
+  </footer>
+</div>
+<script>
+const { createApp, ref, onMounted, computed } = Vue;
+
+createApp({
+  setup() {
+    const carrito = ref([]);
+    const pedidosEspera = ref([]);
+    const errorPedidos = ref(null);
+    const usuarioLogueado = ref(null);    
+
+    const cargarUsuario = () => {
+      const stored = localStorage.getItem('usuarioLogueado');
+      if (stored) {
+        usuarioLogueado.value = JSON.parse(stored);
+      } else {
+        window.location.href = '../../login.html';
+      }
+    };
+
+    // Carga carrito desde localStorage
+    const cargarCarrito = () => {
+      try {
+        const stored = localStorage.getItem('carrito');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          carrito.value = parsed.map(item => ({
+            ...item,
+            id_producto: Number(item.id_producto),
+            precio_u: Number(item.precio_u) || 0,
+            cantidad: Number(item.cantidad) || 1,
+            seleccionado: item.seleccionado !== false,
+            id_restaurante: Number(item.id_restaurante) || null
+          }));
+          console.log('Carrito cargado:', carrito.value); // depuración
+        }
+      } catch (e) {
+        console.error('Error parseando carrito:', e);
+        carrito.value = [];
+      }
+    };
+
+    const totalSeleccionado = computed(() => {
+      return carrito.value.reduce((sum, item) => {
+        const precioNum = Number(item.precio_u) || 0;
+        const cantNum = Number(item.cantidad) || 0;
+        return item.seleccionado ? sum + (precioNum * cantNum) : sum;
+      }, 0);
+    });
+
+    const actualizarCarrito = () => {
+      localStorage.setItem('carrito', JSON.stringify(carrito.value));
+    };
+
+    const eliminarItem = (index) => {
+      carrito.value.splice(index, 1);
+      actualizarCarrito();
+    };
+
+    const pedir = () => {
+      if (totalSeleccionado.value > 0) {
+        window.location.href = 'pago.html';
+      } else {
+        alert('Selecciona al menos un producto para pedir.');
+      }
+    };
+
+    const cargarPedidosEspera = async () => {
+      try {
+        const res = await fetch('../../backend/cliente/pedidos_cliente.php', { credentials: 'include' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (data.success) {
+          pedidosEspera.value = data.pedidos || [];
+          errorPedidos.value = null;
+        } else {
+          errorPedidos.value = data.message || 'No se pudieron cargar los pedidos';
+        }
+      } catch (err) {
+        errorPedidos.value = 'Error al cargar pedidos: ' + err.message;
+        console.error(err);
+      }
+    };
+
+    const estadoTexto = (estado) => {
+      const map = { 
+        R: 'Registrado', 
+        P: 'En preparación', 
+        L: 'Listo', 
+        C: 'En camino', 
+        E: 'Entregado',
+        F: 'Finalizado'
+      };
+      return map[estado] || estado;
+    };
+
+    const volver = () => {
+      window.location.href = 'menucliente.html';
+    };
+
+    const cerrarSesion = () => {
+      if (confirm('¿Cerrar sesión?')) {
+        localStorage.removeItem('usuarioLogueado');
+        localStorage.removeItem('carrito');
+        window.location.href = '../../login.html';
+      }
+    };
+
+    onMounted(() => {
+      cargarUsuario();          // ← corregido (sin espacio)
+      cargarCarrito();
+      cargarPedidosEspera();
+      setInterval(cargarPedidosEspera, 15000);
+      console.log('Vue montado correctamente');
+    });
+
+    return {
+      carrito,
+      pedidosEspera,
+      errorPedidos,
+      usuarioLogueado,
+      actualizarCarrito,
+      eliminarItem,
+      totalSeleccionado,
+      pedir,
+      estadoTexto,
+      volver,
+      cerrarSesion
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

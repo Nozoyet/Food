@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodCourt - Pago y Confirmación</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #1e1e24;
+      color: #fff8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      flex: 1;
+    }
+
+    header {
+      background: #91240c;
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-image: url('../../media/fondorojo1.jpg');
+      background-size: cover;
+    }
+
+    .logo img {
+      height: 70px;
+    }
+
+    .nav-icons {
+      display: flex;
+      gap: 1.8rem;
+      font-size: 1.6rem;
+      color: #ffcf99;
+    }
+
+    .nav-icons a {
+      color: #ffcf99;
+      text-decoration: none;
+      transition: transform 0.2s;
+    }
+
+    .nav-icons a:hover {
+      transform: scale(1.15);
+    }
+
+    main {
+      padding: 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+    }
+
+    h2.section-title {
+      color: #ffcf99;
+      font-size: 1.8rem;
+      margin: 1.5rem 0 1rem;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .detalle-pedido {
+      background: #2a2a32;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid #ffcf99;
+    }
+
+    .item-pedido {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #444;
+    }
+
+    .item-pedido img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .item-info {
+      flex: 1;
+    }
+
+    .item-nombre {
+      color: #ffcf99;
+      font-weight: 600;
+    }
+
+    .item-subtotal {
+      opacity: 0.9;
+    }
+
+    .total-final {
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-align: right;
+      margin-top: 1rem;
+      color: #ffcf99;
+    }
+
+    .form-pago {
+      background: #2a2a32;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid #ffcf99;
+    }
+
+    .form-pago label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #ffcf99;
+    }
+
+    .form-pago input {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #ffcf99;
+      border-radius: 8px;
+      background: #3a3a44;
+      color: #fff8f0;
+      margin-bottom: 1rem;
+    }
+
+    .qr-container {
+      text-align: center;
+      margin: 2rem 0;
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      max-width: 300px;
+      margin: 2rem auto;
+    }
+
+    #qrCode {
+      margin: 0 auto;
+    }
+
+    .btn-pago-realizado {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: block;
+      margin: 2rem auto;
+      transition: all 0.3s;
+    }
+
+    .btn-pago-realizado:hover {
+      background: #218838;
+      transform: scale(1.05);
+    }
+
+    .mensaje-exito {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #28a745;
+      margin: 2rem 0;
+      display: none;
+    }
+
+    footer {
+      background: #91240c;
+      color: #ffcf99;
+      text-align: center;
+      padding: 1.5rem;
+      margin-top: auto;
+      font-size: 0.95rem;
+    }
+    .qr-container {
+      text-align: center;
+      margin: 2rem auto;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      max-width: 380px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+    #qrCode {
+      margin: 0 auto;
+    }
+    .btn-generar {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 1.5rem auto;
+      display: block;
+    }
+    .btn-generar:hover {
+      background: #0056b3;
+    }
+    .btn-confirmar {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 1.2rem 2.5rem;
+      border-radius: 10px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 2rem auto;
+      display: block;
+    }
+    .btn-confirmar:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+    .info-qr {
+      text-align: center;
+      color: #ffcf99;
+      margin: 1rem 0;
+      font-size: 1.1rem;
+    }
+    .error {
+      color: #ff6b6b;
+      text-align: center;
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">
+      <img src="../../media/logo1.png" alt="FoodCourt Logo">
+    </div>
+    <div class="nav-icons">
+      <a href="#" @click="volver">← Volver al carrito</a>
+      <a href="carrito.html">🛒</a>
+      <a href="#" @click.prevent="cerrarSesion">🚪</a>
+    </div>
+  </header>
+
+  <main>
+    <h2 class="section-title">Detalle del Pedido</h2>
+    <div class="detalle-pedido">
+      <div v-for="item in carritoSeleccionado" :key="item.id_producto" class="item-pedido">
+        <img :src="item.foto" :alt="item.nombre">
+        <div class="item-info">
+          <div class="item-nombre">{{ item.nombre }}</div>
+          <div>Cantidad: {{ item.cantidad }} × {{ item.precio_u }} Bs</div>
+        </div>
+      </div>
+      <div class="total-final">
+        
+        <strong>Total a pagar: {{ subtotal }} Bs</strong>
+      </div>
+    </div>
+
+    <div class="form-pago">
+      <label>Razón Social / Nombre:</label>
+      <input v-model="razonSocial" placeholder="Ej: Eddy Vargas" required>
+
+      <h3>Pago vía QR</h3>
+
+      <!-- Contenedor siempre presente, pero visible solo cuando qrGenerado -->
+      <div class="qr-container" :style="{ display: qrGenerado ? 'block' : 'none' }">
+        <div id="qrCode"></div>
+        <p class="info-qr">Escanea para pagar {{ subtotal }} Bs</p>
+      </div>
+
+      <div v-if="!qrGenerado" class="info-qr">Presiona "Generar QR" para ver el código de pago</div>
+
+      <button class="btn-generar" @click="generarQR" :disabled="procesando || !razonSocial.trim()">
+        {{ procesando ? 'Generando...' : 'Generar QR para pagar' }}
+      </button>
+
+      <button class="btn-confirmar" @click="confirmarRegistro" :disabled="procesando || !qrGenerado || !razonSocial.trim()">
+        {{ procesando ? 'Registrando...' : 'Confirmar y Registrar Pedido' }}
+      </button>
+    </div>
+
+    <div v-if="mensajeExito" style="color:#28a745; text-align:center; font-size:1.3rem; margin:2rem 0;">
+      {{ mensajeExito }}
+    </div>
+    <div v-if="errorMensaje" class="error">{{ errorMensaje }}</div>
+  </main>
+
+  <footer>
+    FoodCourt © 2026 - Todos los derechos reservados
+  </footer>
+</div>
+<script>
+const { createApp, ref, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const carritoSeleccionado = ref([]);
+    const subtotal = ref(0);
+    const razonSocial = ref('');
+    const qrGenerado = ref(false);
+    const mensajeExito = ref('');
+    const errorMensaje = ref('');
+    const procesando = ref(false);
+
+    const cargarDatos = () => {
+      const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+      carritoSeleccionado.value = carrito.filter(i => i.seleccionado);
+      subtotal.value = carritoSeleccionado.value.reduce((s, i) => s + (i.precio_u * i.cantidad), 0);
+    };
+
+    const generarQR = () => {
+    if (!razonSocial.value.trim()) {
+      errorMensaje.value = 'Ingresa la razón social primero';
+      return;
+    }
+
+    procesando.value = true;
+    errorMensaje.value = '';
+    mensajeExito.value = '';
+
+    // Texto MUY corto y estructurado
+    const textoQR = `FC-PAGO|${subtotal.value}|${razonSocial.value.trim().substring(0, 60)}|${new Date().toISOString().slice(0,16)}`;
+
+    try {
+      const qrElement = document.getElementById('qrCode');
+      if (!qrElement) throw new Error('Elemento #qrCode no encontrado');
+
+      qrElement.innerHTML = '';
+      new QRCode(qrElement, {
+        text: textoQR,
+        width: 300,
+        height: 300,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.L   // ← bajo nivel de corrección = más capacidad
+      });
+
+      qrGenerado.value = true;
+      mensajeExito.value = '¡QR generado! Escanea para simular el pago.';
+    } catch (err) {
+      errorMensaje.value = 'Error al generar el QR: ' + err.message;
+      console.error(err);
+    } finally {
+      procesando.value = false;
+    }
+  };
+   const confirmarRegistro = async () => {
+      if (!razonSocial.value.trim() || !qrGenerado.value) return;
+
+      // Validación temporal (solo rechaza si hay mezcla real)
+      const restaurantes = new Set(
+        carritoSeleccionado.value
+          .map(p => Number(p.id_restaurante))
+          .filter(id => !isNaN(id) && id > 0)
+      );
+
+      if (restaurantes.size > 1) {
+        errorMensaje.value = 'Solo puedes pedir productos de un mismo restaurante a la vez.';
+        return;
+      }
+
+      if (restaurantes.size === 0) {
+        console.warn('No se encontró id_restaurante válido en ningún producto');
+        errorMensaje.value = 'Error: No se pudo determinar el restaurante. Revisa los productos.';
+        return;
+      }
+
+      procesando.value = true;
+      errorMensaje.value = '';
+      mensajeExito.value = '';
+
+  try {
+    const res = await fetch('../../backend/cliente/crear_pedido.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        razon_social: razonSocial.value.trim(),
+        subtotal: subtotal.value,
+        productos: carritoSeleccionado.value.map(p => ({
+          id_producto: p.id_producto,
+          cantidad: p.cantidad,
+          precio_u: p.precio_u,
+          id_restaurante: p.id_restaurante || 3  // ← este fallback ya no será necesario, pero lo dejas por seguridad
+        }))
+      })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+
+    if (data.success) {
+      mensajeExito.value = `¡Pedido #${data.id_pedido} registrado!`;
+      let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+      carrito = carrito.filter(i => !i.seleccionado);
+      localStorage.setItem('carrito', JSON.stringify(carrito));
+      setTimeout(() => window.location.href = 'carrito.html', 3000);
+    } else {
+      errorMensaje.value = data.message || 'Error al registrar pedido';
+    }
+  } catch (err) {
+    errorMensaje.value = 'Error: ' + err.message;
+    console.error(err);
+  } finally {
+    procesando.value = false;
+  }
+};
+
+    onMounted(() => {
+      cargarDatos();
+    });
+
+    return {
+      carritoSeleccionado,
+      subtotal,
+      razonSocial,
+      qrGenerado,
+      mensajeExito,
+      errorMensaje,
+      procesando,
+      generarQR,
+      confirmarRegistro,
+      volver: () => window.location.href = 'carrito.html',
+      cerrarSesion: () => {
+        if (confirm('¿Cerrar sesión?')) {
+          localStorage.removeItem('usuarioLogueado');
+          localStorage.removeItem('carrito');
+          window.location.href = '../../login.html';
+        }
+      }
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodCourt - Registro de Cliente</title>
+  <link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #1e1e24;
+      background-image: url('media/fondo2.jpg');
+      min-height: 100dvh;
+      background-size: contain;    
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff8f0;
+      padding: 15px;
+    }
+    .register-container {
+      background: #fdf7f0;
+      border-radius: 18px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+      width: 100%;
+      max-width: 480px;
+      padding: 3rem 2.5rem;
+      text-align: center;
+    }
+    .logo {
+      padding: -2px;
+      border: double;
+      background-color: #e5a657;
+      border-color: #91240c;
+      border-width: 8px;
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      font-size: 1.6rem;
+      color: #1e1e24;
+      margin-bottom: 1rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 14px 18px;
+      margin-bottom: 1.2rem;
+      border: none;
+      border-radius: 12px;
+      background: #2c2c3a;
+      color: #fff8f0;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    input:focus, select:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px #ffcf99;
+      background: #33333b;
+    }
+    .error {
+      color: #c44e4e;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 0.5rem 0 0.5rem;
+      min-height: 1.3rem;
+    }
+    .success {
+      color: #578559;
+      font-size: 1rem;
+      margin: 0.5rem 0;
+    }
+    .btn-register {
+      background: linear-gradient(135deg, #ffcf99, #ffb366);
+      color: #1e1e24;
+      border: none;
+      padding: 14px;
+      width: 100%;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 0.5rem;
+    }
+    .btn-register:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(255,207,153,0.4);
+    }
+    .btn-register:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .login-link {
+      display: block;
+      margin-top: 1rem;
+      color: #111d4a;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .login-link:hover {
+      text-decoration: underline;
+    }
+    .button-search{
+      padding: 0 16px;
+              border-radius: 12px;
+              border: none;
+              background: #ffb366;
+              color: #1e1e24;
+              font-weight: 600;
+              cursor: pointer;
+    }
+    .button-search:hover{
+      background: #ce8f50;
+      color: #fdf7f0;
+      transform: translateY(-3px);
+    }
+    .button-confirm{
+      padding: 0 16px;
+              border-radius: 12px;
+              border: none;
+              background: #578559;
+              color: #fdf7f0;
+              font-weight: 600;
+              cursor: pointer;
+    }
+    .button-confirm:hover{
+      background: #436b43;
+      color: #fdf7f0;
+      transform: translateY(-3px);
+    }
+              
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="register-container">
+    <div class="logo"><img src="media/logo1.png" width="290" height="180" alt="Logo"></div>
+    <h2>Registro de Cliente</h2>
+
+    <form @submit.prevent="registrar">
+      <input type="text" v-model="form.CI_C" placeholder="Cédula de Identidad (CI)" required maxlength="11" minlength="7" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+      
+      <input type="text" v-model="form.usuario" placeholder="Usuario" required>
+      
+      <input type="password" v-model="form.contrasena" placeholder="Contraseña" required>
+      
+      <input type="password" v-model="form.contrasena_confirm" placeholder="Confirmar contraseña" required>
+      <p v-if="form.contrasena_confirm && form.contrasena !== form.contrasena_confirm" class="error-small">Las contraseñas no coinciden</p>
+
+      <input type="text" v-model="form.nom1" placeholder="Primer nombre" required>
+      <input type="text" v-model="form.nom2" placeholder="Segundo nombre (opcional)">
+      <input type="text" v-model="form.ap1" placeholder="Primer apellido" required>
+      <input type="text" v-model="form.ap2" placeholder="Segundo apellido (opcional)">
+
+      <input type="email" v-model="form.email" placeholder="Correo electrónico" required @input="validarEmail">
+      <p v-if="form.email && !emailValido" class="error-small">Formato de correo inválido</p>
+
+      <input type="tel" v-model="form.telefono" placeholder="Teléfono" required maxlength="8" minlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+      <p v-if="form.telefono && form.telefono.length !== 8" class="error-small">Debe tener 8 dígitos</p>
+      
+      <div style="display:flex; flex-direction: column; gap:8px; margin-bottom:1rem;">
+        <div style="display:flex; gap:8px;">
+          <input
+            type="text"
+            v-model="form.direccion"
+            placeholder="Esperando ubicación..."
+            style="margin:0; flex: 1; background-color: #fff; color: #333; border: 1px solid #ccc;"
+          >
+          <button class="button-search" type="button" @click="obtenerUbicacionActual" style="background: #2c2c3a; color: #ffb366; width: 50px;">
+            <i class="fa-solid fa-location-crosshairs"></i>
+          </button>
+          <button class="button-confirm" type="button" @click="confirmarDireccionManual">
+            Confirmar
+          </button>
+        </div>
+      </div>
+
+      <div id="map" style="height: 300px; border-radius: 12px; margin-bottom: 1rem; border: 2px solid #ce8f50;"></div>
+      
+      <p class="error">{{ mensajeError }}</p>
+      <p v-if="mensajeSuccess" class="success">{{ mensajeSuccess }}</p>
+
+      <select v-model="form.sexo" required>
+  <option value="" disabled selected>Seleccione Género</option>
+  <option value="1">Masculino</option>
+  <option value="0">Femenino</option>
+  <option value="2">Otro</option>
+</select>
+
+      <input type="date" v-model="form.f_Na" placeholder="Fecha de nacimiento">
+
+      <button type="submit" class="btn-register" :disabled="cargando || !formValido">
+        {{ cargando ? 'Registrando...' : 'Registrarse' }}
+      </button>
+    </form>
+
+    <a href="login.html" class="login-link">¿Cliente frecuente? Inicia sesión</a>
+  </div>
+</div>
+
+<style>
+  .error-small {
+    color: #ff4d4d;
+    font-size: 0.75rem;
+    margin-top: -12px;
+    margin-bottom: 10px;
+    margin-left: 5px;
+    font-weight: bold;
+  }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<script>
+const { createApp, ref, computed, onMounted } = Vue;
+let reverseTimeout = null;
+
+
+createApp({
+  setup() {
+    const form = ref({
+      CI_C: '', usuario: '', contrasena: '', contrasena_confirm: '',
+      nom1: '', nom2: '', ap1: '', ap2: '',
+      email: '', telefono: '', direccion: '',
+      sexo: '', f_Na: '', latitud: null, longitud: null, id_rol: 3  
+    });
+
+    const mensajeError = ref('');
+    const mensajeSuccess = ref('');
+    const cargando = ref(false);
+    const direccionConfirmada = ref(false);
+    const emailValido = ref(true);
+    let map;
+    let marker;
+
+    const ZONAS_SUR = [
+      { n: 'Obrajes', lat: [-16.530, -16.510], lon: [-68.090, -68.060] },
+      { n: 'Calacoto', lat: [-16.545, -16.525], lon: [-68.095, -68.065] },
+      { n: 'Irpavi', lat: [-16.555, -16.535], lon: [-68.100, -68.070] },
+      { n: 'Achumani', lat: [-16.565, -16.545], lon: [-68.110, -68.080] },
+      { n: 'San Miguel', lat: [-16.540, -16.525], lon: [-68.085, -68.065] }
+    ];
+
+    const esUbicacionPermitida = (lat, lng) => {
+      return ZONAS_SUR.some(z => 
+        lat >= z.lat[0] && lat <= z.lat[1] &&
+        lng >= z.lon[0] && lng <= z.lon[1]
+      );
+    };
+
+    const validarEmail = () => {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      emailValido.value = re.test(form.value.email);
+    };
+
+    onMounted(() => {
+      map = L.map('map', {
+        zoomAnimation: false,
+        fadeAnimation: false,
+        markerZoomAnimation: false
+      }).setView([-16.535, -68.080], 14);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        maxZoom: 18
+      }).addTo(map);
+
+
+      ZONAS_SUR.forEach(z => {
+        L.rectangle([[z.lat[0], z.lon[0]], [z.lat[1], z.lon[1]]], {
+          color: "#28a745", weight: 1, fillOpacity: 0.1, interactive: false
+        }).addTo(map);
+      });
+
+      map.on('click', (e) => {
+        const { lat, lng } = e.latlng;
+        if (!esUbicacionPermitida(lat, lng)) {
+            mensajeError.value = 'Ubicación fuera de la zona de cobertura.';
+            return;
+        }
+        colocarMarcador(lat, lng);
+      });
+    });
+
+    const colocarMarcador = (lat, lng) => {
+          form.value.latitud = lat;
+          form.value.longitud = lng;
+          direccionConfirmada.value = false;
+          if (marker) marker.setLatLng([lat, lng]);
+          else marker = L.marker([lat, lng]).addTo(map);
+          confirmarDireccionManual(); 
+        };
+
+    const confirmarDireccionManual = () => {
+      if (!form.value.latitud || !form.value.longitud) return;
+
+      if (reverseTimeout) clearTimeout(reverseTimeout);
+
+      reverseTimeout = setTimeout(async () => {
+        try {
+          const res = await fetch(
+            `backend/reverse.php?lat=${form.value.latitud}&lon=${form.value.longitud}`
+          );
+
+          const data = await res.json();
+
+          if (data?.address) {
+            const a = data.address;
+            const partes = [];
+
+            if (a.road) partes.push(a.road);
+
+            if (a.house_number) {
+              partes.push(`N° ${a.house_number}`);
+            } else if (a.building) {
+              partes.push(a.building);
+            } else if (a.amenity) {
+              partes.push(a.amenity);
+            }
+
+            if (a.suburb || a.neighbourhood) {
+              partes.push(a.suburb || a.neighbourhood);
+            }
+
+            if (a.city || a.town || a.village) {
+              partes.push(a.city || a.town || a.village);
+            }
+
+            form.value.direccion = partes.join(', ');
+          } else {
+            form.value.direccion = 'Ubicación detectada (sin dirección exacta)';
+          }
+
+          direccionConfirmada.value = true;
+          mensajeError.value = '';
+        } catch (err) {
+          console.error(err);
+          mensajeError.value = 'Error al obtener dirección.';
+        }
+      }, 600);
+    };
+
+    const obtenerUbicacionActual = () => {
+      if (!navigator.geolocation) return;
+      mensajeError.value = "Localizando...";
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        if (!esUbicacionPermitida(lat, lng)) {
+          mensajeError.value = "GPS fuera de la zona permitida.";
+          return;
+        }
+        map.setView([lat, lng], 17, { animate: false });
+        colocarMarcador(lat, lng);
+      }, () => {
+        mensajeError.value = "Error al acceder al GPS.";
+      }, {enableHighAccuracy: false, timeout: 5000, maximumAge: 3000 });
+    };
+
+    const formValido = computed(() => {
+      return form.value.CI_C && form.value.usuario && 
+             form.value.contrasena && form.value.contrasena === form.value.contrasena_confirm &&
+             form.value.nom1 && form.value.ap1 && 
+             emailValido.value && form.value.telefono.length === 8 && 
+             direccionConfirmada.value;
+    });
+
+    const registrar = async () => {
+      cargando.value = true;
+      mensajeError.value = '';
+      try {
+        const res = await fetch('backend/registro.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ ...form.value })
+        });
+        const data = await res.json();
+        if (data.success) {
+          mensajeSuccess.value = '¡Registro completado!';
+          setTimeout(() => window.location.href = 'login.html', 2000);
+        } else {
+          mensajeError.value = data.message;
+        }
+      } catch (err) {
+        mensajeError.value = 'Error de conexión.';
+      } finally {
+        cargando.value = false;
+      }
+    };
+
+    return { 
+      form, mensajeError, mensajeSuccess, cargando, 
+      formValido, registrar, obtenerUbicacionActual, confirmarDireccionManual,
+      validarEmail, emailValido 
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+
+</html>
