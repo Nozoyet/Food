@@ -200,7 +200,7 @@
       </button>
     </form>
 
-    <a href="login.html" class="login-link">¿Cliente frecuente? Inicia sesión</a>
+    <a href="index.html" class="login-link">¿Cliente frecuente? Inicia sesión</a>
   </div>
 </div>
 
@@ -381,7 +381,7 @@ createApp({
         const data = await res.json();
         if (data.success) {
           mensajeSuccess.value = '¡Registro completado!';
-          setTimeout(() => window.location.href = 'login.html', 2000);
+          setTimeout(() => window.location.href = 'index.html', 2000);
         } else {
           mensajeError.value = data.message;
         }

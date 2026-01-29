@@ -295,7 +295,7 @@ createApp({
       if (stored) {
         usuarioLogueado.value = JSON.parse(stored);
       } else {
-        window.location.href = '../../login.html';
+        window.location.href = '../../index.html';
       }
     };
 
@@ -384,7 +384,7 @@ createApp({
       if (confirm('¿Cerrar sesión?')) {
         localStorage.removeItem('usuarioLogueado');
         localStorage.removeItem('carrito');
-        window.location.href = '../../login.html';
+        window.location.href = '../../index.html';
       }
     };
 

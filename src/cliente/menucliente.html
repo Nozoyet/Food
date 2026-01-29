@@ -314,7 +314,7 @@ createApp({
         usuarioLogueado.value = JSON.parse(user);
       } else {
         // Si no hay usuario → redirigir a login
-        window.location.href = '../../login.html';
+        window.location.href = '../../index.html';
       }
     };
 
@@ -390,7 +390,7 @@ createApp({
       if (confirm('¿Cerrar sesión?')) {
         localStorage.removeItem('usuarioLogueado');
         localStorage.removeItem('carrito');
-        window.location.href = '../../login.html';
+        window.location.href = '../../index.html';
       }
     };
 
